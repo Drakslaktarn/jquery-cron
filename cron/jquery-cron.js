@@ -93,7 +93,8 @@
         url_set : undefined,
         customValues : undefined,
         onChange: undefined, // callback function each time value changes
-        useGentleSelect: false
+        useGentleSelect: false,
+        periods: ["minute", "hour", "day", "week", "month", "year"]
     };
 
     // -------  build some static data -------
@@ -139,12 +140,7 @@
         str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n";
     }
 
-    // options for period
-    var str_opt_period = "";
-    var periods = ["minute", "hour", "day", "week", "month", "year"];
-    for (var i = 0; i < periods.length; i++) {
-        str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
-    }
+    var availablePeriods = ["minute", "hour", "day", "week", "month", "year"];
 
     // display matrix
     var toDisplay = {
@@ -305,6 +301,15 @@
                 }
             }
 
+            // options for period, only include the periods in the periods array.
+            var str_opt_period = "";
+            var periods = $.grep(o.periods, function(period) {
+                return $.inArray(period, availablePeriods ) !== -1;
+            });
+            for (var i = 0; i < periods.length; i++) {
+                str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
+            }
+
             block["period"] = $("<span class='cron-period'>"
                     + "Every <select name='cron-period'>" + custom_periods
                     + str_opt_period + "</select> </span>")
@@ -389,9 +394,9 @@
             var block = this.data("block");
             var useGentleSelect = o.useGentleSelect;
             var t = getCronType(cron_str, o);
-            
+
             if (!defined(t)) { return false; }
-            
+
             if (defined(o.customValues) && o.customValues.hasOwnProperty(t)) {
                 t = o.customValues[t];
             } else {
@@ -420,7 +425,7 @@
                     }
                 }
             }
-            
+
             // trigger change event
             var bp = block["period"].find("select").val(t);
             if (useGentleSelect) bp.gentleSelect("update");
